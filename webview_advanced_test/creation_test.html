@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Creation and Destruction Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Menu</a>
+        <h1>Creation and Destruction Test</h1>
+        
+        <div class="test-section">
+            <h2>API Documentation</h2>
+            <div class="code-example">
+                <pre>
+-- Create a new WebView
+local webView = native.newWebView(x, y, width, height)
+
+-- Remove WebView
+webView:removeSelf()</pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Live Test</h2>
+            <button onclick="testCreation()" class="test-button">Create Test WebView</button>
+            <div id="testResults" class="result-box">
+                Click button to run test...
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Code</h2>
+            <div class="code-example">
+                <pre>
+local function createTestWebView()
+    local testView = native.newWebView(100, 100, 200, 200)
+    timer.performWithDelay(1000, function()
+        testView:removeSelf()
+    end)
+end</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testCreation() {
+            NativeBridge.callNative("testCreation").then(result => {
+                document.getElementById('testResults').innerHTML = 
+                    `Test completed: WebView created and removed`;
+            });
+        }
+    </script>
+</body>
+</html> 

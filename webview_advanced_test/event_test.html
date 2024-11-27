@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Communication Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Menu</a>
+        <h1>Event Communication Test</h1>
+        
+        <div class="test-section">
+            <h2>Send Event to Lua</h2>
+            <button onclick="sendTestEvent()" class="test-button">Send Test Event</button>
+            <div id="eventResults" class="result-box">
+                Event results will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addEventLog(message, data) {
+            const container = document.getElementById('eventResults');
+            const logDiv = document.createElement('div');
+            logDiv.className = 'event-log';
+            logDiv.innerHTML = `
+                <strong>${message}</strong><br>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            container.insertBefore(logDiv, container.firstChild);
+        }
+
+        window.onNativeBridgeLoaded = function() {
+            // Listen for response events from Lua
+            NativeBridge.on("responseEvent", function(data) {
+                addEventLog("Received response from Lua:", data);
+            });
+        };
+
+        function sendTestEvent() {
+            const testData = {
+                message: "Test event from JavaScript",
+                timestamp: Date.now()
+            };
+            
+            NativeBridge.sendToLua("testEvent", testData);
+            addEventLog("Sent event to Lua:", testData);
+        }
+    </script>
+</body>
+</html> 

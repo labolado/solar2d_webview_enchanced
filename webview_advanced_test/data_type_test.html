@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Type Conversion Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">&larr; Back to Menu</a>
+        <h1>Data Type Conversion Test</h1>
+
+        <!-- Lua to JavaScript -->
+        <div class="test-section">
+            <h2>Lua to JavaScript Conversion</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+| Lua Type | JavaScript Type | Description |
+|----------|----------------|-------------|
+| number | number | Values are preserved exactly |
+| string | string | Strings are preserved exactly |
+| boolean | boolean | Direct true/false mapping |
+| table (array-like) | Array | Sequential tables starting at index 1 |
+| table (hash-like) | Object | Other tables become plain objects |
+| nil | undefined | nil becomes undefined |</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testLuaToJS()" class="test-button">Test Lua to JS Conversion</button>
+                <div id="luaToJsResult" class="result-box">
+                    Click button to test Lua to JavaScript conversion...
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript to Lua -->
+        <div class="test-section">
+            <h2>JavaScript to Lua Conversion</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+| JavaScript Type | Lua Type | Description |
+|----------------|----------|-------------|
+| number | number | Values are preserved exactly |
+| string | string | Strings are preserved exactly |
+| boolean | boolean | Direct true/false mapping |
+| Array | table | Becomes table with index starting at 1 |
+| Object | table | Becomes hash-style table |
+| null/undefined | nil | Both become nil |</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testJSToLua()" class="test-button">Test JS to Lua Conversion</button>
+                <div id="jsToLuaResult" class="result-box">
+                    Click button to test JavaScript to Lua conversion...
+                </div>
+            </div>
+        </div>
+
+        <!-- Edge Cases -->
+        <div class="test-section">
+            <h2>Edge Cases Test</h2>
+            <div class="code-example">
+                <h3>Important Notes</h3>
+                <pre>
+1. Array-like tables must have sequential numeric keys starting at 1
+2. Both JavaScript null and undefined become nil in Lua
+3. Complex nested structures (objects/tables) convert properly
+4. Functions, Date objects and other complex JS types are not supported</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testEdgeCases()" class="test-button">Test Edge Cases</button>
+                <div id="edgeCaseResult" class="result-box">
+                    Click button to test edge cases...
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="test-section">
+            <h2>Test Results Log</h2>
+            <div id="eventLog" class="result-box">
+                Test results will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addTestResult(message, data) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'test-result success';
+            logDiv.innerHTML = `
+                <strong>${message}</strong><br>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            document.getElementById('eventLog').insertBefore(logDiv, document.getElementById('eventLog').firstChild);
+        }
+
+        async function testLuaToJS() {
+            console.log("[Type Test] Testing Lua to JS type conversion");
+            try {
+                const result = await NativeBridge.callNative("testLuaTypes");
+                console.log("[Type Test] Received data from Lua:", result);
+                
+                // Create detailed type analysis
+                const typeAnalysis = {
+                    numbers: {
+                        number: {
+                            value: result.number,
+                            type: typeof result.number,
+                            isInteger: Number.isInteger(result.number)
+                        },
+                        float: {
+                            value: result.float,
+                            type: typeof result.float,
+                            isInteger: Number.isInteger(result.float)
+                        }
+                    },
+                    strings: {
+                        string: {
+                            value: result.string,
+                            type: typeof result.string,
+                            length: result.string ? result.string.length : 0
+                        },
+                        empty: {
+                            value: result.empty,
+                            type: typeof result.empty,
+                            length: result.empty ? result.empty.length : 0
+                        }
+                    },
+                    boolean: {
+                        value: result.boolean,
+                        type: typeof result.boolean
+                    },
+                    null: {
+                        value: result.null,
+                        type: typeof result.null
+                    },
+                    arrays: {
+                        array: {
+                            isArray: Array.isArray(result.array),
+                            length: Array.isArray(result.array) ? result.array.length : 0,
+                            type: typeof result.array,
+                            values: result.array
+                        }
+                    },
+                    objects: {
+                        object: {
+                            type: typeof result.object,
+                            keys: result.object ? Object.keys(result.object) : [],
+                            values: result.object
+                        },
+                        nested: {
+                            type: typeof result.nested,
+                            structure: result.nested
+                        }
+                    }
+                };
+
+                console.log("[Type Test] Type analysis:", typeAnalysis);
+                document.getElementById('luaToJsResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Type Analysis:</strong><br>
+                        <pre>${JSON.stringify(typeAnalysis, null, 2)}</pre>
+                    </div>`;
+                
+                addTestResult("Lua to JS type test completed", typeAnalysis);
+            } catch (error) {
+                console.error("[Type Test] Error:", error);
+                document.getElementById('luaToJsResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testJSToLua() {
+            try {
+                const testData = {
+                    number: 42.5,
+                    string: "Test String",
+                    boolean: true,
+                    array: [1, 2, 3, "mixed", true],
+                    object: {
+                        key: "value",
+                        nested: {
+                            deep: true
+                        }
+                    },
+                    null: null,
+                    undefined: undefined
+                };
+
+                const result = await NativeBridge.callNative("testJSTypes", testData);
+                document.getElementById('jsToLuaResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>JavaScript to Lua Conversion Results:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                addTestResult("JS to Lua test completed", result);
+            } catch (error) {
+                document.getElementById('jsToLuaResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testEdgeCases() {
+            try {
+                const edgeCases = {
+                    sparseArray: [1,,3], // Sparse array
+                    dateObject: new Date(), // Date object
+                    function: function() {}, // Function
+                    symbol: Symbol('test'), // Symbol
+                    deepNested: {
+                        array: [1, [2, [3, [4]]]],
+                        object: {a: {b: {c: {d: true}}}}
+                    }
+                };
+
+                const result = await NativeBridge.callNative("testEdgeCases", edgeCases);
+                document.getElementById('edgeCaseResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Edge Cases Test Results:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                addTestResult("Edge cases test completed", result);
+            } catch (error) {
+                document.getElementById('edgeCaseResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        window.onNativeBridgeLoaded = function() {
+            console.log("Ready to test data type conversions");
+        };
+    </script>
+</body>
+</html> 

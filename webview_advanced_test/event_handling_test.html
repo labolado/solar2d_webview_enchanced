@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Handling Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">&larr; Back to Menu</a>
+        <h1>Event Handling Test</h1>
+
+        <div class="test-section">
+            <h2>API Documentation</h2>
+            <div class="code-example">
+                <pre>
+-- Add URL request listener
+webView:addEventListener("urlRequest", function(event)
+    if event.type == "loaded" then
+        -- Page loaded
+    elseif event.type == "failed" then
+        -- Load failed
+    end
+end)
+
+-- Remove event listener
+webView:removeEventListener("urlRequest")</pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>URL Request Events Test</h2>
+            <div class="test-area">
+                <button onclick="testLoadEvent()" class="test-button">Test Load Event</button>
+                <button onclick="testFailEvent()" class="test-button">Test Fail Event</button>
+                <div id="eventResult" class="result-box">
+                    Click button to test events...
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div id="eventLog" class="result-box">
+                Waiting for events...
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Code</h2>
+            <div class="code-example">
+                <h3>Lua Implementation</h3>
+                <pre>
+-- Event handling test
+webView:addEventListener("urlRequest", function(event)
+    if event.type == "loaded" then
+        print("Page loaded successfully")
+        webView:send("loadStatus", {
+            status = "success",
+            type = "loaded"
+        })
+    elseif event.type == "failed" then
+        print("Page load failed:", event.errorMessage)
+        webView:send("loadStatus", {
+            status = "failed",
+            type = "failed",
+            error = event.errorMessage
+        })
+    end
+end)</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addEventLog(message) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'event-log';
+            logDiv.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            const log = document.getElementById('eventLog');
+            log.insertBefore(logDiv, log.firstChild);
+        }
+
+        window.onNativeBridgeLoaded = function() {
+            console.log("Ready to test events");
+            
+            // Listen for load status events
+            NativeBridge.on("loadStatus", function(data) {
+                addEventLog(`Received ${data.type} event: ${data.status}`);
+            });
+        };
+
+        async function testLoadEvent() {
+            try {
+                const result = await NativeBridge.callNative("testLoadEvent");
+                document.getElementById('eventResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Load Event Test Initiated</strong><br>
+                        Check event log for results
+                    </div>`;
+            } catch (error) {
+                document.getElementById('eventResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Load Event Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testFailEvent() {
+            try {
+                const result = await NativeBridge.callNative("testFailEvent");
+                document.getElementById('eventResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Fail Event Test Initiated</strong><br>
+                        Check event log for results
+                    </div>`;
+            } catch (error) {
+                document.getElementById('eventResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Fail Event Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

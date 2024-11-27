@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+     <script>
+        window.onNativeBridgeLoaded = function() {
+            console.log("NativeBridge is ready!");
+            updateDeviceInfo();  
+        }
+    </script>
+</head>
+<body>
+    <div id="deviceInfo"></div>
+    <button id="updateButton">Update Info</button>
+    <button id="greetButton">Greet</button>
+    <div id="response"></div>
+</body>
+</html>

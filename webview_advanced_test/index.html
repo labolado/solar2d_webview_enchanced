@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebView API Test Suite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>WebView API Test Suite</h1>
+        <div class="test-section">
+            <h2>API Tests</h2>
+            <div class="test-grid">
+                <!-- JavaScript Integration -->
+                <div class="test-card" onclick="location.href='js_integration_test.html'">
+                    <h3>JavaScript Integration</h3>
+                    <p>Test JS integration:</p>
+                    <ul>
+                        <li>Register callbacks</li>
+                        <li>Inject JavaScript</li>
+                        <li>View example code</li>
+                    </ul>
+                </div>
+
+                <!-- Event Handling -->
+                <div class="test-card" onclick="location.href='event_handling_test.html'">
+                    <h3>Event Handling</h3>
+                    <p>Test event system:</p>
+                    <ul>
+                        <li>URL request events</li>
+                        <li>Custom events</li>
+                        <li>Event listeners</li>
+                    </ul>
+                </div>
+
+                <!-- Core Methods -->
+                <div class="test-card" onclick="location.href='core_methods_test.html'">
+                    <h3>Core Methods</h3>
+                    <p>Test core WebView methods:</p>
+                    <ul>
+                        <li>registerCallback</li>
+                        <li>on</li>
+                        <li>send</li>
+                        <li>injectJS</li>
+                    </ul>
+                </div>
+
+                <!-- NativeBridge API -->
+                <div class="test-card" onclick="location.href='nativebridge_test.html'">
+                    <h3>NativeBridge API</h3>
+                    <p>Test JavaScript bridge:</p>
+                    <ul>
+                        <li>callNative</li>
+                        <li>sendToLua</li>
+                        <li>on</li>
+                    </ul>
+                </div>
+
+                <!-- Data Types -->
+                <div class="test-card" onclick="location.href='data_type_test.html'">
+                    <h3>Data Type Tests</h3>
+                    <p>Test data conversion:</p>
+                    <ul>
+                        <li>Basic types</li>
+                        <li>Complex structures</li>
+                        <li>Edge cases</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Documentation Reference</h2>
+            <p>These tests are based on the WebView API documentation. Each test includes relevant code examples and documentation references.</p>
+        </div>
+    </div>
+
+    <script>
+        window.onNativeBridgeLoaded = function() {
+            console.log("Test suite ready - NativeBridge initialized");
+        };
+    </script>
+</body>
+</html> 

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Content Loading Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Menu</a>
+        <h1>Content Loading Test</h1>
+
+        <div class="test-section">
+            <h2>API Documentation</h2>
+            <div class="code-example">
+                <pre>
+-- Load URL or local file
+webView:request(url [, baseDirectory])</pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>URL Loading Test</h2>
+            <div class="test-area">
+                <input type="text" id="urlInput" class="test-input" 
+                       value="https://example.com" placeholder="Enter URL">
+                <button onclick="testURLLoading()" class="test-button">Load URL</button>
+                <div id="urlLoadResult" class="result-box">
+                    Enter URL and click button to test...
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Local File Loading Test</h2>
+            <div class="test-area">
+                <button onclick="testLocalFileLoading()" class="test-button">Load Local File</button>
+                <div id="localLoadResult" class="result-box">
+                    Click button to test loading local file...
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Code</h2>
+            <div class="code-example">
+                <h3>Lua Implementation</h3>
+                <pre>
+-- URL loading test
+webView:registerCallback("loadURL", function(data)
+    local testView = native.newWebView(0, 0, 100, 100)
+    testView:request(data.url)
+    timer.performWithDelay(2000, function()
+        testView:removeSelf()
+    end)
+    return { success = true }
+end)
+
+-- Local file loading test
+webView:registerCallback("loadLocalFile", function()
+    local testView = native.newWebView(0, 0, 100, 100)
+    testView:request("test.html", system.ResourceDirectory)
+    timer.performWithDelay(2000, function()
+        testView:removeSelf()
+    end)
+    return { success = true }
+end)</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onNativeBridgeLoaded = function() {
+            console.log("Ready to test content loading");
+        };
+
+        async function testURLLoading() {
+            const url = document.getElementById('urlInput').value;
+            try {
+                const result = await NativeBridge.callNative("loadURL", { url: url });
+                document.getElementById('urlLoadResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>URL Loading Test Success</strong><br>
+                        URL: ${url}
+                    </div>`;
+            } catch (error) {
+                document.getElementById('urlLoadResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>URL Loading Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testLocalFileLoading() {
+            try {
+                const result = await NativeBridge.callNative("loadLocalFile");
+                document.getElementById('localLoadResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Local File Loading Test Success</strong><br>
+                        Loaded test.html from system.ResourceDirectory
+                    </div>`;
+            } catch (error) {
+                document.getElementById('localLoadResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Local File Loading Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

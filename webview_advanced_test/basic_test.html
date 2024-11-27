@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Function Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Menu</a>
+        <h1>Basic Function Test</h1>
+        
+        <div class="test-section">
+            <h2>Device Information</h2>
+            <div id="deviceInfo" class="result-box">
+                Loading device info...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onNativeBridgeLoaded = async function() {
+            try {
+                const info = await NativeBridge.callNative("getDeviceInfo");
+                document.getElementById('deviceInfo').innerHTML = `
+                    <strong>Platform:</strong> ${info.platform}<br>
+                    <strong>Version:</strong> ${info.version}<br>
+                    <strong>Language:</strong> ${info.language}<br>
+                    <strong>Device Model:</strong> ${info.deviceModel}
+                `;
+            } catch (error) {
+                document.getElementById('deviceInfo').innerHTML = 
+                    `Error getting device info: ${error.message}`;
+            }
+        };
+    </script>
+</body>
+</html> 

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core Methods Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">&larr; Back to Menu</a>
+        <h1>Core Methods Test</h1>
+
+        <!-- registerCallback Test -->
+        <div class="test-section">
+            <h2>1. registerCallback</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+-- Register a callback function that can be called from JavaScript
+webView:registerCallback("methodName", function(data)
+    -- data: table converted from JavaScript object
+    return {  -- Return value will be converted to JavaScript object
+        message = "Hello from Lua",
+        timestamp = os.time()
+    }
+end)</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testRegisterCallback()" class="test-button">Test Callback</button>
+                <div id="callbackResult" class="result-box">
+                    Click button to test registerCallback...
+                </div>
+            </div>
+        </div>
+
+        <!-- on Test -->
+        <div class="test-section">
+            <h2>2. on</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+-- Listen for events sent from JavaScript
+webView:on("eventName", function(data)
+    -- data: table converted from JavaScript object
+    print("Received event:", data.message)
+end)</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testOnEvent()" class="test-button">Test Event Listener</button>
+                <div id="onEventResult" class="result-box">
+                    Click button to test event listener...
+                </div>
+            </div>
+        </div>
+
+        <!-- send Test -->
+        <div class="test-section">
+            <h2>3. send</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+-- Send data to JavaScript
+webView:send("eventName", {
+    message = "Hello from Lua",
+    timestamp = os.time()
+})
+-- In JavaScript, this can be received using NativeBridge.on("eventName", callback)</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testSendEvent()" class="test-button">Test Send Event</button>
+                <div id="sendEventResult" class="result-box">
+                    Click button to test send event...
+                </div>
+            </div>
+        </div>
+
+        <!-- injectJS Test -->
+        <div class="test-section">
+            <h2>4. injectJS</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+-- Inject JavaScript code into WebView
+webView:injectJS([[
+    // JavaScript code to be executed in WebView
+    console.log("Injected code running");
+    
+    // Can access DOM and use NativeBridge
+    document.getElementById("someElement").innerHTML = "Updated";
+    NativeBridge.sendToLua("someEvent", {message: "From injected JS"});
+]])
+
+Notes:
+1. Avoid calling injectJS before page load is complete
+2. Injected code should handle multiple executions
+3. Check for DOM element existence when needed
+4. Use IIFE to avoid global variable pollution</pre>
+            </div>
+            
+            <div class="test-area">
+                <!-- Target element for injection test -->
+                <div id="injectionTarget" class="injection-target">
+                    Content before injection
+                </div>
+                <button onclick="testInjection()" class="test-button">Test Injection</button>
+                <div id="injectionResult" class="result-box">
+                    Click button to test JavaScript injection...
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div id="eventLog" class="result-box">
+                Events will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addEventLog(message, data) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'event-log';
+            logDiv.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}<br>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            const log = document.getElementById('eventLog');
+            log.insertBefore(logDiv, log.firstChild);
+        }
+
+        window.onNativeBridgeLoaded = function() {
+            console.log("Ready to test core methods");
+            
+            // Set up event listeners
+            NativeBridge.on("testEvent", function(data) {
+                addEventLog("Received event from Lua:", data);
+                document.getElementById('sendEventResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Event Received</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+            });
+
+            NativeBridge.on("injectionComplete", function(data) {
+                addEventLog("Injection completed:", data);
+            });
+
+            // Listen for event responses
+            NativeBridge.on("eventResponse", function(data) {
+                console.log("[Core Event Test] Received response:", data);
+                document.getElementById('onEventResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Event Response Received</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+                addEventLog("Event response received", data);
+            });
+        };
+
+        async function testRegisterCallback() {
+            try {
+                const result = await NativeBridge.callNative("testCoreCallback", {
+                    message: "Testing core callback",
+                    timestamp: Date.now()
+                });
+                
+                document.getElementById('callbackResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Callback Test Success</strong><br>
+                        Response from Lua:<br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                
+                addEventLog("Callback test completed", result);
+            } catch (error) {
+                document.getElementById('callbackResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Callback Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testOnEvent() {
+            console.log("[Core Event Test] Sending test event");
+            const testData = {
+                message: "Testing core event listener",
+                timestamp: Date.now(),
+                testId: Math.random().toString(36).substring(7)
+            };
+            
+            console.log("[Core Event Test] Test data:", testData);
+            NativeBridge.sendToLua("testCoreEvent", testData);
+            
+            document.getElementById('onEventResult').innerHTML = `
+                <div class="test-result">
+                    <strong>Event Sent</strong><br>
+                    <pre>${JSON.stringify(testData, null, 2)}</pre>
+                    Waiting for response...
+                </div>`;
+            
+            addEventLog("Event sent", testData);
+        }
+
+        function testSendEvent() {
+            NativeBridge.sendToLua("requestTestEvent", {
+                message: "Please send a test event",
+                timestamp: Date.now()
+            });
+            
+            document.getElementById('sendEventResult').innerHTML = `
+                <div class="test-result">
+                    <strong>Request Sent</strong><br>
+                    Waiting for Lua to send event...
+                </div>`;
+        }
+
+        async function testInjection() {
+            try {
+                console.log("[Injection Test] Starting injection test");
+                const result = await NativeBridge.callNative("testInjection");
+                document.getElementById('injectionResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Injection Test Success</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+            } catch (error) {
+                document.getElementById('injectionResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Injection Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Listen for injection events
+        NativeBridge.on("injectionComplete", function(data) {
+            console.log("Injection completed:", data);
+        });
+    </script>
+</body>
+</html> 

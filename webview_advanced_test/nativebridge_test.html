@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NativeBridge API Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">&larr; Back to Menu</a>
+        <h1>NativeBridge API Test</h1>
+
+        <!-- callNative Test -->
+        <div class="test-section">
+            <h2>1. callNative</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+// Call registered Lua callback
+NativeBridge.callNative("methodName", {
+    // Optional data object
+    key: "value"
+}).then(result => {
+    // Handle result returned from Lua
+    console.log(result);
+});</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testCallNative()" class="test-button">Test callNative</button>
+                <div id="callNativeResult" class="result-box">
+                    Click button to test callNative...
+                </div>
+            </div>
+        </div>
+
+        <!-- sendToLua Test -->
+        <div class="test-section">
+            <h2>2. sendToLua</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+// Send event to Lua
+NativeBridge.sendToLua("eventName", {
+    // Data object
+    message: "Hello from JS",
+    timestamp: Date.now()
+});
+// In Lua, this can be received using webView:on("eventName", callback)</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testSendToLua()" class="test-button">Test sendToLua</button>
+                <div id="sendToLuaResult" class="result-box">
+                    Click button to test sendToLua...
+                </div>
+            </div>
+        </div>
+
+        <!-- on Event Test -->
+        <div class="test-section">
+            <h2>3. on (Event Listener)</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+// Listen for events from Lua
+NativeBridge.on("eventName", function(data) {
+    // Handle data sent from Lua via webView:send()
+    console.log("Received from Lua:", data);
+});</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testEventListener()" class="test-button">Test Event Listener</button>
+                <div id="eventListenerResult" class="result-box">
+                    Click button to test event listener...
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div id="eventLog" class="result-box">
+                Events will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addEventLog(message, data) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'event-log';
+            logDiv.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}<br>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            document.getElementById('eventLog').insertBefore(logDiv, document.getElementById('eventLog').firstChild);
+        }
+
+        window.onNativeBridgeLoaded = function() {
+            console.log("[NativeBridge Test] API test ready");
+            
+            // Set up event listener for test events
+            NativeBridge.on("testResponse", function(data) {
+                console.log("[NativeBridge Test] Received response:", data);
+                document.getElementById('eventListenerResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Event Response Received</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>`;
+                addEventLog("Received response from Lua", data);
+            });
+        };
+
+        async function testCallNative() {
+            console.log("[NativeBridge Test] Testing callNative");
+            try {
+                const result = await NativeBridge.callNative("testNativeBridge", {
+                    message: "Test message",
+                    timestamp: Date.now(),
+                    testId: Math.random().toString(36).substring(7)
+                });
+                
+                document.getElementById('callNativeResult').innerHTML = `
+                    <div class="test-result success">
+                        <strong>callNative Test Success</strong><br>
+                        Response from Lua:<br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                
+                addEventLog("callNative test completed", result);
+            } catch (error) {
+                console.error("[NativeBridge Test] Error:", error);
+                document.getElementById('callNativeResult').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>callNative Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        function testSendToLua() {
+            console.log("[NativeBridge Test] Testing sendToLua");
+            const testData = {
+                message: "Test event from JavaScript",
+                timestamp: Date.now(),
+                testId: Math.random().toString(36).substring(7)
+            };
+            
+            console.log("[NativeBridge Test] Sending data:", testData);
+            NativeBridge.sendToLua("testEvent", testData);
+            
+            document.getElementById('sendToLuaResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>sendToLua Test Completed</strong><br>
+                    Sent data:<br>
+                    <pre>${JSON.stringify(testData, null, 2)}</pre>
+                </div>`;
+            
+            addEventLog("Sent event to Lua", testData);
+        }
+
+        function testEventListener() {
+            console.log("[NativeBridge Test] Testing event listener");
+            document.getElementById('eventListenerResult').innerHTML = `
+                <div class="test-result">
+                    <strong>Event Listener Active</strong><br>
+                    Waiting for response from Lua...
+                </div>`;
+            
+            // Trigger an event from Lua
+            const testData = {
+                message: "Please send a response",
+                timestamp: Date.now(),
+                testId: Math.random().toString(36).substring(7)
+            };
+            
+            NativeBridge.sendToLua("triggerTestEvent", testData);
+            addEventLog("Event listener test initiated", testData);
+        }
+    </script>
+</body>
+</html> 

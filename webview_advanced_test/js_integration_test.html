@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Integration Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">&larr; Back to Menu</a>
+        <h1>JavaScript Integration Test</h1>
+
+        <!-- NativeBridge Ready Event -->
+        <div class="test-section">
+            <h2>1. NativeBridge Ready Event</h2>
+            <div class="code-example">
+                <h3>Documentation</h3>
+                <pre>
+window.onNativeBridgeLoaded = function() {
+    console.log("NativeBridge is ready!");
+    // Initialize NativeBridge related features here
+};</pre>
+            </div>
+            
+            <div class="test-area">
+                <div id="readyStatus" class="result-box">
+                    Checking NativeBridge status...
+                </div>
+            </div>
+        </div>
+
+        <!-- Basic Communication -->
+        <div class="test-section">
+            <h2>2. Basic Communication Example</h2>
+            <div class="code-example">
+                <h3>Complete Example</h3>
+                <pre>
+// JavaScript Code
+window.onNativeBridgeLoaded = function() {
+    NativeBridge.callNative("getDeviceInfo").then(info => {
+        document.getElementById('deviceInfo').innerHTML = 
+            `Platform: ${info.platform}<br>
+             Version: ${info.version}`;
+    });
+}
+
+// Lua Code
+webView:registerCallback("getDeviceInfo", function()
+    return {
+        platform = system.getInfo("platform"),
+        version = system.getInfo("architectureInfo")
+    }
+end)</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testBasicCommunication()" class="test-button">Test Basic Communication</button>
+                <div id="deviceInfo" class="result-box">
+                    Click button to get device info...
+                </div>
+            </div>
+        </div>
+
+        <!-- Initialization Timing -->
+        <div class="test-section">
+            <h2>3. Initialization Timing</h2>
+            <div class="code-example">
+                <h3>Best Practice</h3>
+                <pre>
+// Always initialize in onNativeBridgeLoaded
+window.onNativeBridgeLoaded = function() {
+    // Safe to use NativeBridge here
+    initializeFeatures();
+};</pre>
+            </div>
+            
+            <div class="test-area">
+                <button onclick="testInitTiming()" class="test-button">Test Init Timing</button>
+                <div id="initResult" class="result-box">
+                    Click button to test initialization timing...
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div id="eventLog" class="result-box">
+                Events will appear here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addEventLog(message, data) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'event-log';
+            logDiv.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}<br>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            document.getElementById('eventLog').insertBefore(logDiv, document.getElementById('eventLog').firstChild);
+        }
+
+        // Record load time
+        const pageLoadTime = Date.now();
+
+        window.onNativeBridgeLoaded = function() {
+            const bridgeLoadTime = Date.now();
+            const loadDelay = bridgeLoadTime - pageLoadTime;
+            
+            document.getElementById('readyStatus').innerHTML = `
+                <div class="test-result success">
+                    <strong>NativeBridge Ready!</strong><br>
+                    Load delay: ${loadDelay}ms
+                </div>`;
+            
+            addEventLog("NativeBridge initialized", { loadDelay });
+        };
+
+        async function testBasicCommunication() {
+            try {
+                const info = await NativeBridge.callNative("getDeviceInfo");
+                document.getElementById('deviceInfo').innerHTML = `
+                    <div class="test-result success">
+                        <strong>Device Information:</strong><br>
+                        <pre>${JSON.stringify(info, null, 2)}</pre>
+                    </div>`;
+                addEventLog("Got device info", info);
+            } catch (error) {
+                document.getElementById('deviceInfo').innerHTML = `
+                    <div class="test-result failure">
+                        <strong>Communication Failed</strong><br>
+                        Error: ${error.message}
+                    </div>`;
+            }
+        }
+
+        async function testInitTiming() {
+            const timingInfo = {
+                pageLoadTime: pageLoadTime,
+                currentTime: Date.now(),
+                nativeBridgeExists: !!window.NativeBridge
+            };
+
+            document.getElementById('initResult').innerHTML = `
+                <div class="test-result success">
+                    <strong>Timing Information:</strong><br>
+                    <pre>${JSON.stringify(timingInfo, null, 2)}</pre>
+                </div>`;
+            addEventLog("Timing test completed", timingInfo);
+        }
+    </script>
+</body>
+</html> 
