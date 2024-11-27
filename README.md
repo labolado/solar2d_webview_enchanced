@@ -4,7 +4,7 @@ An enhanced WebView for Solar2D
 This project consists of two main parts:
 
 ## Solar2d WebView Extended API
-We've extended the WebView API (https://github.com/labolado/corona) with new methods and events to make it more powerful. For detailed documentation, see docs/webview_api.md.
+We've extended the WebView API ([labolado/corona](https://github.com/labolado/corona)) with new methods and events to make it more powerful. For detailed documentation, see [docs/webview_api.md](docs/webview_api.md).
 
 Note: The project (https://github.com/labolado/corona) provides two Solar2D builds:
 1. Solar2D 202x.xxxx.b3.vx build:
@@ -34,7 +34,7 @@ NativeBridge API:
 Examples demonstrating the usage of the new WebView API can be found in webview_basic_test and webview_advanced_test.
 
 ## WebView Enhanced Module
-We provide an enhanced module (webview_enhanced) for easier WebView usage. For detailed documentation, see docs/webview_enhanced_api.md.
+We provide an enhanced module (webview_enhanced) for easier WebView usage. For detailed documentation, see [docs/webview_enhanced_api.md](docs/webview_enhanced_api.md).
 
 Key Features:
 1. Enhanced Script Management
