@@ -4,7 +4,7 @@ An enhanced WebView for Solar2D
 This project consists of two main parts:
 
 ## Solar2d WebView Extended API
-We've extended the WebView API (based on https://github.com/labolado/corona) with new methods and events to make it more powerful. For detailed documentation, see docs/webview_api.md.
+We've extended the WebView API (https://github.com/labolado/corona) with new methods and events to make it more powerful. For detailed documentation, see docs/webview_api.md.
 
 Note: The project (https://github.com/labolado/corona) provides two Solar2D builds:
 1. Solar2D 202x.xxxx.b3.vx build:
