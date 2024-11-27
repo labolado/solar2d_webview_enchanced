@@ -1,0 +1,5 @@
+{
+            "type": "resource",
+            "message": "Resource directory test file",
+            "path": "data/test.json"
+        }

@@ -1,18 +1,105 @@
 local json = require("json")
+local WebViewEnhanced = require("webview_enhanced")
 
 print("\n[WebView Test Suite]")
 print("===================")
 print("Starting test suite initialization...")
 
 -- Create WebView for testing
-local webView = native.newWebView(
-    display.contentCenterX,
-    display.contentCenterY,
-    display.actualContentWidth,
-    display.actualContentHeight
-)
+local webView = WebViewEnhanced.createWebView({
+    rewriteXHR = true,
+    x = display.contentCenterX,
+    y = display.contentCenterY,
+    width = display.actualContentWidth,
+    height = display.actualContentHeight
+})
 
 print("[Init] WebView created successfully")
+
+-- Set XHR handler
+webView:setXHRHandler(function(request)
+    print("\n[XHR Handler] ================")
+    print("[XHR Handler] Received request:")
+    print(json.prettify(request))
+    
+    -- Simulate different response scenarios
+    if request.url:match("^https://api%.example%.com/data") then
+        -- GET request test
+        return {
+            status = 200,
+            statusText = "OK",
+            headers = {
+                ["Content-Type"] = "application/json"
+            },
+            body = json.encode({
+                message = "GET request successful",
+                timestamp = os.time(),
+                received = request
+            })
+        }
+    elseif request.url:match("^https://api%.example%.com/create") then
+        -- POST request test
+        return {
+            status = 201,
+            statusText = "Created",
+            headers = {
+                ["Content-Type"] = "application/json"
+            },
+            body = json.encode({
+                message = "Resource created",
+                timestamp = os.time(),
+                received = request
+            })
+        }
+    elseif request.url:match("^https://api%.example%.com/headers") then
+        -- Custom headers test
+        return {
+            status = 200,
+            statusText = "OK",
+            headers = request.headers,
+            body = json.encode({
+                message = "Headers received",
+                headers = request.headers
+            })
+        }
+    elseif request.url:match("^https://api%.example%.com/async") then
+        -- Async request test
+        timer.performWithDelay(1000, function()
+            return {
+                status = 200,
+                statusText = "OK",
+                body = json.encode({
+                    message = "Async request completed",
+                    async = request.async
+                })
+            }
+        end)
+    elseif request.url:match("^https://api%.example%.com/sync") then
+        -- Sync request test
+        return {
+            status = 200,
+            statusText = "OK",
+            body = json.encode({
+                message = "Sync request completed",
+                async = request.async
+            })
+        }
+    elseif request.url:match("^https://invalid%-url%.example") then
+        -- Error test
+        return {
+            status = 404,
+            statusText = "Not Found",
+            body = "Resource not found"
+        }
+    end
+    
+    -- Default response
+    return {
+        status = 400,
+        statusText = "Bad Request",
+        body = "Invalid request URL"
+    }
+end)
 
 -- Add URL request listener for NativeBridge initialization
 webView:addEventListener("urlRequest", function(event)
@@ -386,6 +473,47 @@ webView:on("triggerTestEvent", function(data)
     -- Send response back to JavaScript
     webView:send("testResponse", response)
     print("[Event Listener Test] ================")
+end)
+
+-- Enhanced Features Tests
+webView:registerCallback("testEvaluateJS", function()
+    print("\n[Enhanced Test] Testing evaluateJS")
+    
+    webView:evaluateJS([[
+        const target = document.getElementById('evaluateTarget');
+        target.textContent = 'Updated by evaluateJS at: ' + new Date().toLocaleTimeString();
+        target.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+        
+        NativeBridge.sendToLua('scriptResult', {
+            target: 'evaluate',
+            success: true,
+            time: new Date().toLocaleTimeString(),
+            message: 'evaluateJS executed successfully'
+        });
+    ]])
+    
+    return { success = true }
+end)
+
+webView:registerCallback("testGlobalScript", function()
+    print("\n[Enhanced Test] Testing addGlobalScript")
+    
+    webView:addGlobalScript([[
+        const target = document.getElementById('globalTarget');
+        if (target) {
+            target.textContent = 'Updated by global script at: ' + new Date().toLocaleTimeString();
+            target.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            
+            NativeBridge.sendToLua('scriptResult', {
+                target: 'global',
+                success: true,
+                time: new Date().toLocaleTimeString(),
+                message: 'Global script executed'
+            });
+        }
+    ]])
+    
+    return { success = true }
 end)
 
 -- Load the test suite

@@ -1,5 +1,25 @@
 # WebView API Documentation
 
+## Table of Contents
+- [WebView API Documentation](#webview-api-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Core Methods](#core-methods)
+    - [registerCallback](#registercallback)
+    - [on](#on)
+    - [send](#send)
+    - [injectJS](#injectjs)
+  - [NativeBridge API](#nativebridge-api)
+    - [Initialization](#initialization)
+    - [callNative](#callnative)
+    - [sendToLua](#sendtolua)
+    - [on](#on-1)
+  - [Data Type Conversion](#data-type-conversion)
+    - [Lua to JavaScript](#lua-to-javascript)
+    - [JavaScript to Lua](#javascript-to-lua)
+  - [Complete Example](#complete-example)
+    - [Lua Code](#lua-code)
+    - [HTML Code](#html-code)
+
 ## Core Methods
 
 ### registerCallback
@@ -67,14 +87,14 @@ webView:injectJS([[
 ```
 
 Important Notes:
-1. Must inject after NativeBridge is ready (in onNativeBridgeLoaded)
+1. Must inject after NativeBridge is ready (in onNativeBridgeReady)
 2. Check for DOM element existence
 3. Handle multiple executions
 4. Avoid global namespace pollution
 
 Best Practice:
 ```javascript
-window.onNativeBridgeLoaded = function() {
+window.onNativeBridgeReady = function() {
     // Safe to inject JavaScript here
     webView:injectJS([[
         // Your injection code
@@ -86,7 +106,7 @@ window.onNativeBridgeLoaded = function() {
 
 ### Initialization
 ```javascript
-window.onNativeBridgeLoaded = function() {
+window.onNativeBridgeReady = function() {
     // NativeBridge is ready
     console.log("NativeBridge ready");
     initializeFeatures();
@@ -227,7 +247,7 @@ end)
 <head>
     <meta charset="UTF-8">
      <script>
-        window.onNativeBridgeLoaded = function() {
+        window.onNativeBridgeReady = function() {
             console.log("NativeBridge is ready!");
             updateDeviceInfo();  
         }

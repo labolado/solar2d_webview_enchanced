@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Features Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-button" onclick="location.href='index.html'">Back to Tests</button>
+            <h2>Enhanced Features Test</h2>
+        </div>
+        
+        <div class="test-section">
+            <h3>evaluateJS Test</h3>
+            <div id="evaluateTarget" class="test-target">Initial content</div>
+            <button onclick="testEvaluateJS()">Test evaluateJS</button>
+            <pre id="evaluateResult" class="result-display"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>Global Script Test</h3>
+            <div id="globalTarget" class="test-target">Initial content</div>
+            <button onclick="testGlobalScript()">Add Global Script</button>
+            <button onclick="reloadPage()">Reload Page</button>
+            <pre id="globalResult" class="result-display"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>XMLHttpRequest Test</h3>
+            <div class="test-scenarios">
+                <h4>Test Scenarios</h4>
+                <button onclick="testGETRequest()">Test GET Request</button>
+                <button onclick="testPOSTRequest()">Test POST Request</button>
+                <button onclick="testAsyncRequest()">Test Async Request</button>
+                <button onclick="testSyncRequest()">Test Sync Request</button>
+                <button onclick="testHeadersRequest()">Test Custom Headers</button>
+                <button onclick="testAbortRequest()">Test Abort Request</button>
+                <button onclick="testErrorRequest()">Test Error Handling</button>
+            </div>
+            <pre id="xhrResult" class="result-display"></pre>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Description</h3>
+            <ul>
+                <li><strong>evaluateJS:</strong> Tests immediate script execution</li>
+                <li><strong>addGlobalScript:</strong> Tests persistent scripts that run on every page load</li>
+                <li><strong>XMLHttpRequest:</strong> Tests XHR rewriting functionality</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        window.onNativeBridgeReady = function() {
+            console.log("Enhanced test ready");
+            NativeBridge.on("scriptResult", function(data) {
+                const target = document.getElementById(data.target + "Result");
+                if (target) {
+                    target.textContent = JSON.stringify(data, null, 2);
+                }
+            });
+        };
+
+        function testEvaluateJS() {
+            NativeBridge.callNative("testEvaluateJS");
+        }
+
+        function testGlobalScript() {
+            NativeBridge.callNative("testGlobalScript");
+        }
+
+        function reloadPage() {
+            location.reload();
+        }
+
+        // XMLHttpRequest 测试代码
+        let currentXHR = null;
+
+        function addRequestHeader() {
+            const headers = document.getElementById('requestHeaders');
+            const headerRow = document.createElement('div');
+            headerRow.className = 'header-row';
+            headerRow.innerHTML = `
+                <input type="text" placeholder="Header name" class="header-name">
+                <input type="text" placeholder="Header value" class="header-value">
+                <button onclick="this.parentElement.remove()">Remove</button>
+            `;
+            headers.appendChild(headerRow);
+        }
+
+        function getRequestHeaders() {
+            const headers = {};
+            document.querySelectorAll('.header-row').forEach(row => {
+                const name = row.querySelector('.header-name').value.trim();
+                const value = row.querySelector('.header-value').value.trim();
+                if (name && value) {
+                    headers[name] = value;
+                }
+            });
+            return headers;
+        }
+
+        function testXHR() {
+            const method = document.getElementById('xhrMethod').value;
+            const url = document.getElementById('xhrUrl').value;
+            const body = document.getElementById('xhrBody').value;
+            const async = document.getElementById('xhrAsync').checked;
+            const headers = getRequestHeaders();
+            
+            const result = document.getElementById('xhrResult');
+            result.textContent = 'Sending request...';
+            
+            currentXHR = new XMLHttpRequest();
+            currentXHR.open(method, url, async);
+            
+            // 设置请求头
+            Object.entries(headers).forEach(([name, value]) => {
+                currentXHR.setRequestHeader(name, value);
+            });
+            
+            // 记录请求开始时间
+            const startTime = Date.now();
+            
+            currentXHR.onreadystatechange = function() {
+                result.textContent = JSON.stringify({
+                    readyState: this.readyState,
+                    status: this.status,
+                    statusText: this.statusText,
+                    responseTime: Date.now() - startTime + 'ms',
+                    headers: headers,
+                    response: this.responseText
+                }, null, 2);
+            };
+            
+            currentXHR.onerror = function(error) {
+                result.textContent = JSON.stringify({
+                    error: 'Request failed',
+                    details: error.message
+                }, null, 2);
+            };
+            
+            currentXHR.send(body);
+        }
+
+        function testXHRAbort() {
+            if (currentXHR) {
+                currentXHR.abort();
+                document.getElementById('xhrResult').textContent = 'Request aborted';
+            }
+        }
+
+        // 预定义的测试场景
+        function testGETRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.example.com/data');
+            showRequest(xhr, 'Simple GET Request');
+        }
+
+        function testPOSTRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://api.example.com/create');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            showRequest(xhr, 'POST with JSON', JSON.stringify({
+                name: "Test Item",
+                value: 123
+            }));
+        }
+
+        function testAsyncRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.example.com/async', true);
+            showRequest(xhr, 'Async GET Request');
+        }
+
+        function testSyncRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.example.com/sync', false);
+            showRequest(xhr, 'Sync GET Request');
+        }
+
+        function testHeadersRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.example.com/headers');
+            xhr.setRequestHeader('X-Custom-Header', 'test-value');
+            xhr.setRequestHeader('Authorization', 'Bearer test-token');
+            showRequest(xhr, 'Request with Custom Headers');
+        }
+
+        function testAbortRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.example.com/long-request');
+            showRequest(xhr, 'Aborted Request');
+            setTimeout(() => xhr.abort(), 100);
+        }
+
+        function testErrorRequest() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://invalid-url.example/404');
+            showRequest(xhr, 'Error Request');
+        }
+
+        function showRequest(xhr, title, body = null) {
+            const result = document.getElementById('xhrResult');
+            const startTime = Date.now();
+            
+            result.textContent = JSON.stringify({
+                title: title,
+                status: 'Starting request...'
+            }, null, 2);
+
+            xhr.onreadystatechange = function() {
+                result.textContent = JSON.stringify({
+                    title: title,
+                    readyState: this.readyState,
+                    status: this.status,
+                    statusText: this.statusText,
+                    responseTime: Date.now() - startTime + 'ms',
+                    response: this.responseText
+                }, null, 2);
+            };
+
+            xhr.onerror = function(error) {
+                result.textContent = JSON.stringify({
+                    title: title,
+                    error: 'Request failed',
+                    details: error.message
+                }, null, 2);
+            };
+
+            xhr.onabort = function() {
+                result.textContent = JSON.stringify({
+                    title: title,
+                    status: 'Request aborted',
+                    responseTime: Date.now() - startTime + 'ms'
+                }, null, 2);
+            };
+
+            xhr.send(body);
+        }
+    </script>
+</body>
+</html> 
