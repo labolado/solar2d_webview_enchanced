@@ -30,14 +30,14 @@ Features:
 Examples:
 ---------
 -- Execute JavaScript
-webView:evaluateJS([[
+webView:evaluateJS([=[
     document.body.style.backgroundColor = 'red';
-]])
+]=])
 
 -- Add global script
-webView:addGlobalScript([[
+webView:addGlobalScript([=[
     console.log('Page loaded at:', new Date());
-]])
+]=])
 
 -- Handle XHR requests
 webView:setXHRHandler(function(request)
