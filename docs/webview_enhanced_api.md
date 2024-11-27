@@ -31,6 +31,7 @@
   - [Complete Example](#complete-example-1)
   - [Best Practices](#best-practices)
   - [Important Notes](#important-notes)
+    - [XMLHttpRequest Rewriting](#xmlhttprequest-rewriting)
 
 ### Enhanced WebView API
 1. [Enhanced Methods](#enhanced-methods)
@@ -42,8 +43,6 @@
 5. [Important Notes](#important-notes)
 
 ---
-
-[保持原有文档的所有内容，从 Core Methods 开始...]
 
 ## Core Methods
 

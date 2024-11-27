@@ -76,6 +76,17 @@
                         <li>Script queuing</li>
                     </ul>
                 </div>
+
+                <!-- Google Automation Test -->
+                <div class="test-card" onclick="testGoogleAutomation()">
+                    <h3>Google Automation</h3>
+                    <p>Test Google automation:</p>
+                    <ul>
+                        <li>Matrix background effect</li>
+                        <li>Auto search 'labo lado'</li>
+                        <li>Custom WebView instance</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -89,6 +100,17 @@
         window.onNativeBridgeReady = function() {
             console.log("Test suite ready - NativeBridge initialized");
         };
+
+        // 添加 Google 自动化测试函数
+        function testGoogleAutomation() {
+            NativeBridge.callNative("testGoogleAutomation")
+                .then(result => {
+                    console.log("Google automation test started:", result);
+                })
+                .catch(error => {
+                    console.error("Failed to start Google automation test:", error);
+                });
+        }
     </script>
 </body>
 </html> 

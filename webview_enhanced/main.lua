@@ -520,4 +520,212 @@ end)
 print("\n[Init] Loading test suite...")
 webView:request("index.html", system.ResourceDirectory)
 print("[Init] Test suite initialization complete")
-print("===================\n") 
+print("===================\n")
+
+-- 在现有代码后添加 Google 自动化测试入口
+webView:registerCallback("testGoogleAutomation", function()
+    print("\n[Google Test] Starting Google automation test")
+    
+    -- 创建新的 WebView 用于测试
+    local testView = WebViewEnhanced.createWebView({
+        x = display.contentCenterX,
+        y = display.contentCenterY,
+        width = display.actualContentWidth,
+        height = display.actualContentHeight
+    })
+    
+    -- 创建一个容器组
+    local closeGroup = display.newGroup()
+
+    -- Create rounded rectangle background for close button
+    local closeBg = display.newRoundedRect(
+        closeGroup,
+        display.contentWidth - 60,
+        40,
+        100,
+        40,
+        8
+    )
+    closeBg:setFillColor(0.8, 0, 0, 0.9)
+
+    -- Add text label
+    local closeText = display.newText({
+        parent = closeGroup,
+        text = "BACK",
+        x = display.contentWidth - 60,
+        y = 40,
+        font = native.systemFont,
+        fontSize = 18
+    })
+    closeText:setFillColor(1, 1, 1)
+
+    -- Add tap event
+    closeGroup:addEventListener("tap", function()
+        closeGroup:removeSelf()
+        testView:removeSelf()
+    end)
+
+    -- Add touch feedback
+    closeGroup:addEventListener("touch", function(event)
+        if event.phase == "began" then
+            closeBg:setFillColor(0.6, 0, 0, 0.9)
+        elseif event.phase == "ended" or event.phase == "cancelled" then
+            closeBg:setFillColor(0.8, 0, 0, 0.9)
+        end
+        return true
+    end)
+    
+    -- Inject Matrix animation style
+    testView:addGlobalScript([[
+        (function(){
+            const style = document.createElement('style');
+            style.textContent = `
+                /* Prevent scrollbar */
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+                
+                /* Matrix canvas - bottom layer */
+                #matrix-canvas {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: -2;
+                }
+                
+                /* Semi-transparent overlay - middle layer */
+                .matrix-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.3);
+                    pointer-events: none;
+                    z-index: -1;
+                }
+
+                /* Ensure page content stays on top */
+                body > *:not(#matrix-canvas):not(.matrix-overlay) {
+                    position: relative;
+                    z-index: 1;
+                }
+
+                /* Adjust Google search input style */
+                input[name="q"] {
+                    background-color: rgba(255, 255, 255, 0.95) !important;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Create Matrix canvas - bottom layer
+            const canvas = document.createElement('canvas');
+            canvas.id = 'matrix-canvas';
+            document.body.insertBefore(canvas, document.body.firstChild);
+            
+            // Create overlay - middle layer
+            const overlay = document.createElement('div');
+            overlay.className = 'matrix-overlay';
+            document.body.insertBefore(overlay, document.body.firstChild.nextSibling);
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to window size
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Matrix effect configuration
+            const config = {
+                fontSize: 14,
+                chars: '日ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ',
+                color: '#0F0',
+                speed: 1.2,
+                density: 0.8
+            };
+            
+            // Create rain drops
+            const columns = Math.floor(canvas.width / config.fontSize);
+            const drops = Array(Math.floor(columns * config.density)).fill(0).map(() => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height,
+                speed: Math.random() * 0.5 + config.speed
+            }));
+            
+            // Drawing function
+            function draw() {
+                // Create fade out effect
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set text style
+                ctx.fillStyle = config.color;
+                ctx.font = config.fontSize + 'px monospace';
+                
+                // Update and draw each rain drop
+                drops.forEach(drop => {
+                    // Randomly select character
+                    const char = config.chars[Math.floor(Math.random() * config.chars.length)];
+                    
+                    // Draw character
+                    ctx.fillText(char, drop.x, drop.y);
+                    
+                    // Update position
+                    drop.y += drop.speed * config.fontSize;
+                    
+                    // If it goes off the bottom of the screen, reset to the top
+                    if (drop.y > canvas.height) {
+                        drop.y = -config.fontSize;
+                        drop.x = Math.random() * canvas.width;
+                        drop.speed = Math.random() * 0.5 + config.speed;
+                    }
+                });
+                
+                requestAnimationFrame(draw);
+            }
+            
+            // Start animation
+            requestAnimationFrame(draw);
+        })();
+    ]])
+    
+    -- Listen for page load completion
+    testView:addEventListener("urlRequest", function(event)
+        if event.type == "loaded" then
+            -- Wait for DOM to fully load
+            timer.performWithDelay(1000, function()
+                -- Perform search operation
+                testView:evaluateJS([[
+                    (function(){
+                        // Check if we're on the main Google search page
+                        const isMainPage = window.location.pathname === '/' || 
+                                         window.location.pathname === '/search' && !window.location.search;
+                        
+                        if(isMainPage) {
+                            // Only perform search on the main page
+                            const searchInput = document.querySelector('input[name="q"]');
+                            if(searchInput) {
+                                searchInput.value = 'labo lado';
+                                const form = searchInput.closest('form');
+                                if(form) form.submit();
+                            }
+                        }
+                        // Do nothing if we're already on the search results page
+                    })();
+                ]])
+            end)
+        end
+    end)
+    
+    -- Load Google
+    testView:request("https://www.google.com")
+    
+    return { success = true }
+end) 
