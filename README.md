@@ -1,28 +1,79 @@
-# solar2d_webview_enchanced
+# solar2d_webview_enhanced
 An enhanced WebView for Solar2D
 
-这个项目主要包括两部分
-## Solar2d WebView 扩展API
-1 我们扩展了WebView的API，增加了一些新的方法，并且增加了一些新的事件，使得WebView的功能更加强大。具体可以参考docs/webview_api.md.我们增加的API包括：
-- registerCallback: 注册一个可以从JavaScript调用的Lua函数
-- on: 监听从JavaScript发送的事件
-- send: 向JavaScript发送事件
-- injectJS: 向WebView注入JavaScript代码
+This project consists of two main parts:
 
-主要特性:
-- 双向通信: Lua和JavaScript之间可以方便地相互调用和传递数据
-- 类型转换: 自动处理Lua和JavaScript之间的数据类型转换
-- 事件机制: 提供了基于事件的通信方式
-- 代码注入: 支持动态注入JavaScript代码到WebView
+## Solar2d WebView Extended API
+We've extended the WebView API (based on https://github.com/labolado/corona) with new methods and events to make it more powerful. For detailed documentation, see docs/webview_api.md.
+
+Note: The project (https://github.com/labolado/corona) provides two Solar2D builds:
+1. Solar2D 202x.xxxx.b3.vx build:
+   - Includes Box2D 3.0 physics engine
+2. Solar2D 202x.xxxx.vx build:
+   - Matches official Solar2D release
+
+Choose the appropriate build based on your project's requirements.
+
+Added APIs include:
+- registerCallback: Register Lua functions that can be called from JavaScript
+- on: Listen for events sent from JavaScript
+- send: Send events to JavaScript
+- injectJS: Inject JavaScript code into WebView
+
+Key Features:
+- Two-way Communication: Easy data exchange between Lua and JavaScript
+- Type Conversion: Automatic data type conversion between Lua and JavaScript
+- Event System: Event-based communication mechanism
+- Code Injection: Dynamic JavaScript code injection support
 
 NativeBridge API:
-- callNative: 调用已注册的Lua回调函数
-- sendToLua: 向Lua发送事件
-- on: 监听来自Lua的事件
-2 提供了示例，展示了如何使用新的WebView API，具体可以参考 webview_basic_test 和 webview_advanced_test 两个例子。
+- callNative: Call registered Lua callbacks
+- sendToLua: Send events to Lua
+- on: Listen for events from Lua
 
-##为了更方便的使用WebView，我们提供了一个新的模块webview_enchanced，具体可以参考docs/webview_enchanced_api.md.
-这个模块主要提供了以下功能：
-- 更简单的API，使得使用WebView更加方便
-- 重写了XmlHttpRequest，这样可以方便的在Solar2d中使用XmlHttpRequest
+Examples demonstrating the usage of the new WebView API can be found in webview_basic_test and webview_advanced_test.
+
+## WebView Enhanced Module
+We provide an enhanced module (webview_enhanced) for easier WebView usage. For detailed documentation, see docs/webview_enhanced_api.md.
+
+Key Features:
+1. Enhanced Script Management
+   - evaluateJS: Execute JavaScript code immediately with automatic error handling
+   - addGlobalScript: Add scripts that execute on every page load
+   - Automatic script queue management
+
+2. XMLHttpRequest Rewriting (Optional)
+   - Handle all XMLHttpRequest operations in Lua
+   - Maintain standard XMLHttpRequest interface
+   - Support both synchronous and asynchronous requests
+   - Complete request and response control
+
+Usage Example:
+```lua
+local WebViewEnhanced = require("webview_enhanced")
+
+-- Create enhanced WebView (XHR rewriting optional)
+local webView = WebViewEnhanced.createWebView({
+    rewriteXHR = true  -- defaults to false
+})
+
+-- Execute JavaScript code
+webView:evaluateJS("document.body.style.backgroundColor = 'red'")
+
+-- Add global script
+webView:addGlobalScript([[
+    console.log('Page loaded at:', new Date().toLocaleTimeString());
+]])
+
+-- Handle XMLHttpRequest operations (when enabled)
+webView:setXHRHandler(function(request)
+    return {
+        status = 200,
+        statusText = "OK",
+        body = "Response from Lua"
+    }
+end)
+```
+
+Complete examples and test cases can be found in the project.
   
