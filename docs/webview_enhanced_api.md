@@ -2,47 +2,31 @@
 
 ## Table of Contents
 
-### Base WebView API
-- [WebView API Documentation](#webview-api-documentation)
-  - [Table of Contents](#table-of-contents)
-    - [Base WebView API](#base-webview-api)
-    - [Enhanced WebView API](#enhanced-webview-api)
-  - [Core Methods](#core-methods)
-    - [registerCallback](#registercallback)
-    - [on](#on)
-    - [send](#send)
-    - [injectJS](#injectjs)
-  - [NativeBridge API](#nativebridge-api)
-    - [Initialization](#initialization)
-    - [callNative](#callnative)
-    - [sendToLua](#sendtolua)
-    - [on](#on-1)
-  - [Data Type Conversion](#data-type-conversion)
-    - [Lua to JavaScript](#lua-to-javascript)
-    - [JavaScript to Lua](#javascript-to-lua)
-  - [Complete Example](#complete-example)
-    - [Lua Code](#lua-code)
-    - [HTML Code](#html-code)
-- [WebView Enhanced API Documentation](#webview-enhanced-api-documentation)
-  - [Enhanced Methods](#enhanced-methods)
-    - [evaluateJS](#evaluatejs)
-    - [addGlobalScript](#addglobalscript)
-  - [Creating Enhanced WebView](#creating-enhanced-webview)
-  - [Complete Example](#complete-example-1)
-  - [Best Practices](#best-practices)
-  - [Important Notes](#important-notes)
-    - [XMLHttpRequest Rewriting](#xmlhttprequest-rewriting)
+1. Base WebView API
+   - [Core Methods](#core-methods)
+     - [registerCallback](#registercallback)
+     - [on](#on)
+     - [send](#send)
+     - [injectJS](#injectjs)
+   - [NativeBridge API](#nativebridge-api)
+     - [Initialization](#initialization)
+     - [callNative](#callnative)
+     - [sendToLua](#sendtolua)
+     - [on](#on-1)
+   - [Data Type Conversion](#data-type-conversion)
+     - [Lua to JavaScript](#lua-to-javascript)
+     - [JavaScript to Lua](#javascript-to-lua)
+   - [Base Example](#complete-example)
 
-### Enhanced WebView API
-1. [Enhanced Methods](#enhanced-methods)
-   - [evaluateJS](#evaluatejs)
-   - [addGlobalScript](#addglobalscript)
-2. [Creating Enhanced WebView](#creating-enhanced-webview)
-3. [Complete Example (Enhanced)](#complete-example-1)
-4. [Best Practices](#best-practices)
-5. [Important Notes](#important-notes)
-
----
+2. Enhanced WebView API
+   - [Enhanced Methods](#enhanced-methods)
+     - [evaluateJS](#evaluatejs)
+     - [addGlobalScript](#addglobalscript)
+   - [Creating Enhanced WebView](#creating-enhanced-webview)
+   - [Enhanced Example](#complete-example-1)
+   - [Best Practices](#best-practices)
+   - [Important Notes](#important-notes)
+     - [XMLHttpRequest Rewriting](#xmlhttprequest-rewriting)
 
 ## Core Methods
 
@@ -285,9 +269,6 @@ end)
 </body>
 </html>
 ```
-# WebView Enhanced API Documentation
-
-WebView Enhanced extends the base WebView functionality with enhanced script management capabilities.
 
 ## Enhanced Methods
 
